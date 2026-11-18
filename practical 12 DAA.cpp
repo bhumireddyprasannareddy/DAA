@@ -1,71 +1,80 @@
 
 #include <iostream>
 #include <vector>
-#include <algorithm>
 #include <climits>
 using namespace std;
+
+// Function to find minimum travelling cost
+int tsp(vector<vector<int>>& graph, vector<bool>& visited,
+        int current, int count, int cost, int start, int n)
+{
+    // If all cities are visited
+    if (count == n)
+    {
+        // Return to starting city
+        return cost + graph[current][start];
+    }
+
+    int minCost = INT_MAX;
+
+    // Visit all unvisited cities
+    for (int i = 0; i < n; i++)
+    {
+        if (!visited[i])
+        {
+            // Mark the city as visited
+            visited[i] = true;
+
+            // Calculate cost recursively
+            int newCost = tsp(graph, visited, i,
+                              count + 1,
+                              cost + graph[current][i],
+                              start, n);
+
+            // Find minimum cost
+            minCost = min(minCost, newCost);
+
+            // Backtrack: mark city as unvisited
+            visited[i] = false;
+        }
+    }
+
+    return minCost;
+}
 
 int main()
 {
     int n;
 
+    // Get number of cities
     cout << "Enter number of cities: ";
     cin >> n;
 
-    vector<vector<int>> cost(n, vector<int>(n));
+    // Create adjacency matrix
+    vector<vector<int>> graph(n, vector<int>(n));
 
+    // Get travelling costs
     cout << "Enter cost matrix:\n";
 
-    for(int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
-        for(int j = 0; j < n; j++)
+        for (int j = 0; j < n; j++)
         {
-            cin >> cost[i][j];
+            cin >> graph[i][j];
         }
     }
 
-    vector<int> path;
+    // Create visited array
+    vector<bool> visited(n, false);
 
-    for(int i = 1; i < n; i++)
-    {
-        path.push_back(i);
-    }
+    // Start from city 0
+    visited[0] = true;
 
-    int minCost = INT_MAX;
-    vector<int> bestPath;
+    // Calculate minimum travelling cost
+    int result = tsp(graph, visited, 0, 1, 0, 0, n);
 
-    do
-    {
-        int currentCost = 0;
-        int k = 0;
-
-        for(int i = 0; i < path.size(); i++)
-        {
-            currentCost += cost[k][path[i]];
-            k = path[i];
-        }
-
-        currentCost += cost[k][0];
-
-        if(currentCost < minCost)
-        {
-            minCost = currentCost;
-            bestPath = path;
-        }
-
-    } while(next_permutation(path.begin(), path.end()));
-
-    cout << "\nMinimum travelling cost: "
-         << minCost << endl;
-
-    cout << "Best Path: 0 ";
-
-    for(int city : bestPath)
-    {
-        cout << "-> " << city;
-    }
-
-    cout << " -> 0" << endl;
+    // Display result
+    cout << "\nMinimum travelling cost: " << result << endl;
 
     return 0;
 }
